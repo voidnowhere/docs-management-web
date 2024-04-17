@@ -1,4 +1,6 @@
 import {
+    BadgeMinus,
+    Download,
     File, Search,
 } from "lucide-react"
 
@@ -13,23 +15,28 @@ import {
 
 import {Input} from "@/components/ui/input"
 
-import {useSearchDocs} from "@/hooks/useSearchDocs.ts";
 import React, {useState} from "react";
 import {Table, TableBody, TableCaption, TableCell, TableHead, TableHeader, TableRow} from "@/components/ui/table.tsx";
 import {Skeleton} from "@/components/ui/skeleton.tsx";
 import {formatLocalDateToDateString, formatLocalDateToTimeString} from "@/libs/utils.ts";
+import {useDeleteDoc, useSearchDocs} from "@/hooks";
 
 
 function Dashboard() {
     const [searchValue, setSearchValue] = useState<string>("" as string);
     const {data: filterDocs, isPending} = useSearchDocs(searchValue);
-    const columns = ['Titre', 'Date de création', 'Metadata'];
+    const deleteMutation = useDeleteDoc();
+    const columns = ['Title', 'Creation date', 'Metadata', ''];
 
 
     function handleSearch(value: string) {
         setSearchValue(value);
     }
 
+
+    const handleDelete = async (id: string) => {
+        await deleteMutation.mutateAsync(id);
+    };
 
     return (
         <div className="flex min-h-screen w-full flex-col bg-muted/40">
@@ -119,6 +126,17 @@ function Dashboard() {
                                                                     <strong>{key}:</strong> {value}
                                                                 </li>
                                                             ))}
+                                                        </TableCell>
+                                                        <TableCell>
+                                                            <div className="flex h-1 items-center  text-sm">
+                                                                <Button variant="outline" size="sm">
+                                                                    <Download className="h-4 w-4"/>
+                                                                </Button>
+                                                                <Button variant="outline" size="sm" name='deleteDoc'
+                                                                        onClick={() => handleDelete(doc.id)}>
+                                                                    <BadgeMinus className="h-4 w-4" color='red'/>
+                                                                </Button>
+                                                            </div>
                                                         </TableCell>
                                                     </TableRow>
                                                 </React.Fragment>

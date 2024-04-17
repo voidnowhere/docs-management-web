@@ -1,8 +1,7 @@
 import {
-    File, Search,
+    Search,
 } from "lucide-react"
 
-import {Button} from "@/components/ui/button"
 import {
     Card,
     CardContent,
@@ -18,7 +17,7 @@ import React, {useState} from "react";
 import {Table, TableBody, TableCaption, TableCell, TableHead, TableHeader, TableRow} from "@/components/ui/table.tsx";
 import {Skeleton} from "@/components/ui/skeleton.tsx";
 import {formatLocalDateToDateString, formatLocalDateToTimeString} from "@/libs/utils.ts";
-
+import UploadDocDrawer from "@/components/dashboard/UploadDocDrawer.tsx";
 
 function Dashboard() {
     const [searchValue, setSearchValue] = useState<string>("" as string);
@@ -64,14 +63,7 @@ function Dashboard() {
                                     }}
                                 />
                             </div>
-                            <Button
-                                size="sm"
-                                variant="outline"
-                                className="h-7 gap-1 text-sm"
-                            >
-                                <File className="h-3.5 w-3.5"/>
-                                <span className="sr-only sm:not-sr-only">Upload new file</span>
-                            </Button>
+                            <UploadDocDrawer/>
                         </div>
 
                         <Card x-chunk="dashboard-05-chunk-3">

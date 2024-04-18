@@ -1,12 +1,14 @@
 import {createBrowserRouter, createRoutesFromElements, Route, RouterProvider} from "react-router-dom";
 import {lazy, Suspense} from "react";
+import PrivateRoute from "@/routes/PrivateRoute.tsx";
 
-const HomePage = lazy(() => import('../pages/HomePage.tsx'))
+const DefaultLayout = lazy(() => import('../layouts/DefaultLayout.tsx'))
 const Dashboard = lazy(() => import('../pages/Dashboard.tsx'))
+
 const router = createBrowserRouter(
     createRoutesFromElements(
-        <Route path='/' element={<HomePage/>}>
-            <Route path='docs' element={<Dashboard/>}/>
+        <Route path='/' element={<DefaultLayout/>}>
+            <Route path='docs' element={<PrivateRoute><Dashboard/></PrivateRoute>}/>
         </Route>
     )
 )

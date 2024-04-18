@@ -17,8 +17,8 @@ import {ScrollArea} from "@/components/ui/scroll-area.tsx";
 import useCreateDoc from "@/hooks/useCreateDoc.ts";
 import {useRef, useState} from "react";
 import {useQueryClient} from "@tanstack/react-query";
-import {searchDocsQueryKey} from "@/hooks";
 import {useToast} from "@/components/ui/use-toast.ts";
+import {docsQueryKeys} from "@/hooks/user-query-keys.ts";
 
 const formSchema = z.object({
     file: z.any(),
@@ -63,7 +63,7 @@ function UploadDocDrawer() {
             metadata: values.metadata,
         }).then(() => {
             closeDrawer()
-            queryClient.invalidateQueries({queryKey: [searchDocsQueryKey]})
+            queryClient.invalidateQueries({queryKey: docsQueryKeys.all})
         }).catch(reason => {
             toast({
                 variant: 'destructive',

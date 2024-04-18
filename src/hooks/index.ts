@@ -1,4 +1,5 @@
-import {searchDocsQueryKey, useSearchDocs} from "@/hooks/useSearchDocs.ts";
-import useCreateDoc from "@/hooks/useCreateDoc.ts";
+import {useDocs,} from "@/hooks/useDocs.ts";
+import {useApi} from "../libs/useApi";
+import {useDeleteDoc} from "@/hooks/useDeleteDoc.ts";
 
-export {useSearchDocs, searchDocsQueryKey, useCreateDoc};
+export {useDocs, useApi, useDeleteDoc};

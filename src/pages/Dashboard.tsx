@@ -1,25 +1,34 @@
+import {useState} from "react";
+import {useDeleteDoc, useDocs} from "@/hooks";
+import UploadDocDrawer from "@/components/dashboard/UploadDocDrawer";
 import {
     BadgeMinus,
-    Download, Search,
-} from "lucide-react"
-
-import {Button} from "@/components/ui/button"
+    Download,
+    Search,
+} from "lucide-react";
+import {Button} from "@/components/ui/button";
 import {
     Card,
     CardContent,
     CardDescription,
     CardHeader,
     CardTitle,
-} from "@/components/ui/card"
-
-import {Input} from "@/components/ui/input"
-
-import React, {useState} from "react";
-import {Table, TableBody, TableCell, TableHead, TableHeader, TableRow} from "@/components/ui/table.tsx";
-import {Skeleton} from "@/components/ui/skeleton.tsx";
-import {formatLocalDateToDateString, formatLocalDateToTimeString} from "@/libs/utils.ts";
-import {useDeleteDoc, useDocs} from "@/hooks";
-import UploadDocDrawer from "@/components/dashboard/UploadDocDrawer.tsx";
+} from "@/components/ui/card";
+import {Input} from "@/components/ui/input";
+import {
+    Table,
+    TableBody,
+    TableCell,
+    TableHead,
+    TableHeader,
+    TableRow,
+} from "@/components/ui/table";
+import {Skeleton} from "@/components/ui/skeleton";
+import {
+    formatLocalDateToDateString,
+    formatLocalDateToTimeString,
+} from "@/libs/utils";
+import {Doc} from "@/types/doc.ts";
 
 
 function RenderSkeleton() {
@@ -33,6 +42,43 @@ function RenderSkeleton() {
                 className="h-4 w-full"/></TableCell>
         </TableRow>
     </>;
+}
+
+interface Props {
+    doc: Doc,
+    handleDelete: (id: string) => void;
+    handleDownload: (id: string) => void;
+
+}
+
+function DocumentRow(props: Props) {
+    return (
+        <TableRow>
+            <TableCell>{props.doc.title}</TableCell>
+            <TableCell>
+                {formatLocalDateToDateString(props.doc.creationDate)} -{" "}
+                {formatLocalDateToTimeString(props.doc.creationDate)}
+            </TableCell>
+            <TableCell>
+                {Object.entries(props.doc.metadata).map(([key, value]) => (
+                    <li key={key}>
+                        <strong>{key}:</strong> {value}
+                    </li>
+                ))}
+            </TableCell>
+            <TableCell>
+                <div className="flex h-1 items-center text-sm">
+                    <Button variant="outline" size="sm" onClick={() => props.handleDownload(props.doc.id)}>
+                        <Download className="h-4 w-4"/>
+                    </Button>
+                    <Button variant="outline" size="sm" name="deleteDoc"
+                            onClick={() => props.handleDelete(props.doc.id)}>
+                        <BadgeMinus className="h-4 w-4" color="red"/>
+                    </Button>
+                </div>
+            </TableCell>
+        </TableRow>
+    );
 }
 
 function Dashboard() {
@@ -63,38 +109,14 @@ function Dashboard() {
             </TableRow>
         );
 
-        return (
-            filterDocs?.map((doc, index) => (
-                <React.Fragment key={index}>
-                    <TableRow>
-                        <TableCell>{doc.title}</TableCell>
-                        <TableCell>
-                            {formatLocalDateToDateString(doc.creationDate)} - {formatLocalDateToTimeString(doc.creationDate)}
-                        </TableCell>
-                        <TableCell>
-                            {Object.entries(doc.metadata).map(([key, value]) => (
-                                <li key={key}>
-                                    <strong>{key}:</strong> {value}
-                                </li>
-                            ))}
-                        </TableCell>
-                        <TableCell>
-                            <div className="flex h-1 items-center  text-sm">
-                                <Button variant="outline"
-                                        size="sm"
-                                        onClick={() => handleDownload(doc.id)}>
-                                    <Download className="h-4 w-4"/>
-                                </Button>
-                                <Button variant="outline" size="sm" name='deleteDoc'
-                                        onClick={() => handleDelete(doc.id)}>
-                                    <BadgeMinus className="h-4 w-4" color='red'/>
-                                </Button>
-                            </div>
-                        </TableCell>
-                    </TableRow>
-                </React.Fragment>
-            ))
-        )
+        return filterDocs.map((doc, index) => (
+            <DocumentRow
+                key={index}
+                doc={doc}
+                handleDownload={handleDownload}
+                handleDelete={handleDelete}
+            />
+        ));
 
     }
 

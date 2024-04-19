@@ -20,6 +20,9 @@ import {useQueryClient} from "@tanstack/react-query";
 import {useToast} from "@/components/ui/use-toast.ts";
 import {docsQueryKeys} from "@/hooks/doc-query-keys.ts";
 
+interface Props {
+    incrementCount: () => void;
+}
 
 const formSchema = z.object({
     file: z.any(),
@@ -31,7 +34,7 @@ const formSchema = z.object({
     )
 })
 
-function UploadDocDrawer() {
+function UploadDocDrawer(props: Props) {
     const [isOpen, setIsOpen] = useState<boolean>(false);
     const form = useForm<z.infer<typeof formSchema>>({
         resolver: zodResolver(formSchema),
@@ -63,6 +66,7 @@ function UploadDocDrawer() {
             file: file,
             metadata: values.metadata,
         }).then(() => {
+            props.incrementCount()
             closeDrawer()
             queryClient.invalidateQueries({queryKey: docsQueryKeys.all})
         }).catch(reason => {

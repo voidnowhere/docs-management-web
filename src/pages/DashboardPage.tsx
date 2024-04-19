@@ -1,5 +1,5 @@
 import {useState} from "react";
-import {useDeleteDoc, useDocs} from "@/hooks";
+import {useDeleteDoc, useDocs, useDownloadDoc} from "@/hooks";
 import UploadDocDrawer from "@/components/dashboard/UploadDocDrawer";
 import {
     BadgeMinus,
@@ -81,13 +81,13 @@ function DocumentRow(props: Props) {
     );
 }
 
-function Dashboard() {
+function DashboardPage() {
     const [searchValue, setSearchValue] = useState<string>("" as string);
     const {data: filterDocs, isPending} = useDocs(searchValue);
     const deleteMutation = useDeleteDoc();
     const columns = ['Title', 'Creation date', 'Metadata', ''];
     const [count, setCount] = useState(filterDocs?.length || 0);
-
+    const {mutateAsync: downloadDoc} = useDownloadDoc()
 
     function handleSearch(value: string) {
         setSearchValue(value);
@@ -101,12 +101,20 @@ function Dashboard() {
     const incrementCount = () => {
         setCount(count + 1);
     }
+
     const handleDownload = async (id: string) => {
-        console.log('Download', id);
-        window.open(`api/docs/${id}/download`, '_blank')
-
+        downloadDoc(id).then(data => {
+            const blob = new Blob([data.fileContent]);
+            const url = window.URL.createObjectURL(blob);
+            const link = document.createElement('a')
+            link.setAttribute('href', url)
+            link.setAttribute('download', data.fileName)
+            link.style.display = 'none';
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+        })
     }
-
 
     function getFilterDocs() {
         if (!filterDocs || filterDocs?.length === 0) return (
@@ -191,4 +199,4 @@ function Dashboard() {
     )
 }
 
-export default Dashboard;
+export default DashboardPage;

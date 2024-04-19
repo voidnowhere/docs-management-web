@@ -71,15 +71,19 @@ function DocumentRow(props: Props) {
             </TableCell>
             <TableCell>
                 <div className="flex h-1 items-center text-sm">
-                    <ShareDocModal docId={props.doc.id}/>
                     <Button variant="outline" size="sm" onClick={() => props.handleDownload(props.doc.id)}>
                         <Download className="h-4 w-4"/>
                     </Button>
                     {!props.tableType &&
-                        <Button variant="outline" size="sm" name="deleteDoc"
-                                onClick={() => props.handleDelete(props.doc.id)}>
-                            <BadgeMinus className="h-4 w-4" color="red"/>
-                        </Button>
+                        (
+                            <>
+                                <ShareDocModal docId={props.doc.id}/>
+                                <Button variant="outline" size="sm" name="deleteDoc"
+                                        onClick={() => props.handleDelete(props.doc.id)}>
+                                    <BadgeMinus className="h-4 w-4" color="red"/>
+                                </Button>
+                            </>
+                        )
                     }
                 </div>
             </TableCell>

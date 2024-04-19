@@ -8,6 +8,8 @@ import {
 import {useAuth} from "react-oidc-context";
 import LogoutButton from "@/components/auth/logout-button.tsx";
 import LoginButton from "@/components/auth/login-button.tsx";
+import {Suspense} from "react";
+import LoadingPage from "@/pages/LoadingPage.tsx";
 
 function DefaultLayout() {
     const auth = useAuth()
@@ -36,7 +38,9 @@ function DefaultLayout() {
                     <LogoutButton/>
                 </div>
             </div>
-            <Outlet/>
+            <Suspense fallback={<LoadingPage/>}>
+                <Outlet/>
+            </Suspense>
         </>
     )
 }

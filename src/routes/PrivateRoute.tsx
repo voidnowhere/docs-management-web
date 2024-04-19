@@ -1,12 +1,17 @@
 import {useAuth} from "react-oidc-context";
-import {JSX} from "react";
-import {Navigate} from "react-router-dom";
+import {JSX, useEffect} from "react";
 
 function PrivateRoute({children}: { children: JSX.Element[] | JSX.Element }) {
     const auth = useAuth();
 
+    useEffect(() => {
+        if (!auth.isAuthenticated) {
+            auth.signinRedirect()
+        }
+    }, [auth]);
+
     if (!auth.isAuthenticated) {
-        return <Navigate to={'/'}/>
+        return null
     }
 
     return children

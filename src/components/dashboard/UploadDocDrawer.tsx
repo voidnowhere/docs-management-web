@@ -15,7 +15,7 @@ import {z} from "zod";
 import {zodResolver} from "@hookform/resolvers/zod";
 import {ScrollArea} from "@/components/ui/scroll-area.tsx";
 import useCreateDoc from "@/hooks/useCreateDoc.ts";
-import {useRef, useState} from "react";
+import {useEffect, useRef, useState} from "react";
 import {useQueryClient} from "@tanstack/react-query";
 import {useToast} from "@/components/ui/use-toast.ts";
 import {docsQueryKeys} from "@/hooks/doc-query-keys.ts";
@@ -39,7 +39,8 @@ function UploadDocDrawer(props: Props) {
     const form = useForm<z.infer<typeof formSchema>>({
         resolver: zodResolver(formSchema),
         defaultValues: {
-            file: ''
+            file: '',
+            metadata: []
         }
     })
     const {
@@ -54,6 +55,12 @@ function UploadDocDrawer(props: Props) {
     const inputFile = useRef<HTMLInputElement | null>(null)
     const queryClient = useQueryClient()
     const {toast} = useToast()
+    useEffect(() => {
+        if (!isOpen) {
+            removeMetadata()
+            form.reset()
+        }
+    }, [isOpen]);
 
     const onSubmit = (values: z.infer<typeof formSchema>) => {
         const file = inputFile.current?.files?.[0]
@@ -87,8 +94,6 @@ function UploadDocDrawer(props: Props) {
 
     const closeDrawer = () => {
         setIsOpen(false)
-        removeMetadata()
-        form.reset()
     }
 
     return (

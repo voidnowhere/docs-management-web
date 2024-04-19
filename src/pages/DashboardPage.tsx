@@ -30,6 +30,7 @@ import {
 } from "@/libs/utils";
 import {Doc} from "@/types/doc.ts";
 import {useGetSharedDocs} from "@/hooks/useGetSharedDocs.ts";
+import ShareDocModal from "@/components/dashboard/ShareDocModal.tsx";
 
 
 function RenderSkeleton() {
@@ -70,6 +71,7 @@ function DocumentRow(props: Props) {
             </TableCell>
             <TableCell>
                 <div className="flex h-1 items-center text-sm">
+                    <ShareDocModal docId={props.doc.id}/>
                     <Button variant="outline" size="sm" onClick={() => props.handleDownload(props.doc.id)}>
                         <Download className="h-4 w-4"/>
                     </Button>

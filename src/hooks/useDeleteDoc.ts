@@ -1,6 +1,6 @@
 import {useMutation, useQueryClient} from '@tanstack/react-query';
 import {useApi} from "@/libs/useApi.ts";
-import {docsQueryKeys} from "@/hooks/user-query-keys.ts";
+import {docsQueryKeys} from "@/hooks/doc-query-keys.ts";
 import {useToast} from "@/components/ui/use-toast.ts";
 
 

@@ -29,6 +29,7 @@ import {
     formatLocalDateToTimeString,
 } from "@/libs/utils";
 import {Doc} from "@/types/doc.ts";
+import {useGetSharedDocs} from "@/hooks/useGetSharedDocs.ts";
 
 
 function RenderSkeleton() {
@@ -46,6 +47,7 @@ function RenderSkeleton() {
 
 interface Props {
     doc: Doc,
+    tableType?: string;
     handleDelete: (id: string) => void;
     handleDownload: (id: string) => void;
 
@@ -71,10 +73,12 @@ function DocumentRow(props: Props) {
                     <Button variant="outline" size="sm" onClick={() => props.handleDownload(props.doc.id)}>
                         <Download className="h-4 w-4"/>
                     </Button>
-                    <Button variant="outline" size="sm" name="deleteDoc"
-                            onClick={() => props.handleDelete(props.doc.id)}>
-                        <BadgeMinus className="h-4 w-4" color="red"/>
-                    </Button>
+                    {!props.tableType &&
+                        <Button variant="outline" size="sm" name="deleteDoc"
+                                onClick={() => props.handleDelete(props.doc.id)}>
+                            <BadgeMinus className="h-4 w-4" color="red"/>
+                        </Button>
+                    }
                 </div>
             </TableCell>
         </TableRow>
@@ -84,6 +88,7 @@ function DocumentRow(props: Props) {
 function DashboardPage() {
     const [searchValue, setSearchValue] = useState<string>("" as string);
     const {data: filterDocs, isPending} = useDocs(searchValue);
+    const {data: sharedDocs, isPending: isSharedDocsPending} = useGetSharedDocs();
     const deleteMutation = useDeleteDoc();
     const columns = ['Title', 'Creation date', 'Metadata', ''];
     const [count, setCount] = useState(filterDocs?.length || 0);
@@ -134,6 +139,26 @@ function DashboardPage() {
 
     }
 
+    function getSharedDocs() {
+        if (!sharedDocs || sharedDocs?.length === 0) return (
+            <TableRow>
+                <TableCell colSpan={3} className={"text-center"}>No documents found</TableCell>
+            </TableRow>
+        );
+
+        return sharedDocs.map((doc, index) => (
+            <DocumentRow
+                key={index}
+                doc={doc}
+                tableType="shared"
+                handleDownload={handleDownload}
+                handleDelete={() => {
+                }}
+            />
+        ));
+
+    }
+
     return (
         <div className="flex min-h-screen w-full flex-col bg-muted/40">
             <div className="flex flex-col sm:gap-14 sm:py-10 sm:pl-4">
@@ -170,28 +195,50 @@ function DashboardPage() {
                             <UploadDocDrawer incrementCount={incrementCount}/>
                         </div>
 
-                        <Card x-chunk="dashboard-05-chunk-3">
-                            <CardHeader className="px-7">
-                                <CardTitle>Documents</CardTitle>
-                                <CardDescription>
-                                    Recent documents from your storage.
-                                </CardDescription>
-                            </CardHeader>
-                            <CardContent>
-                                <Table>
-                                    <TableHeader>
-                                        <TableRow>
-                                            {columns.map((column) => (
-                                                <TableHead key={column}>{column}</TableHead>
-                                            ))}
-                                        </TableRow>
-                                    </TableHeader>
-                                    <TableBody>
-                                        {isPending ? <RenderSkeleton/> : getFilterDocs()}
-                                    </TableBody>
-                                </Table>
-                            </CardContent>
-                        </Card>
+                        <div className="flex gap-4">
+                            <Card x-chunk="dashboard-05-chunk-3" className="flex-grow">
+                                <CardHeader className="px-7">
+                                    <CardTitle>My Documents</CardTitle>
+                                    <CardDescription>
+                                        Recent documents from your storage.
+                                    </CardDescription>
+                                </CardHeader>
+                                <CardContent>
+                                    <Table>
+                                        <TableHeader>
+                                            <TableRow>
+                                                {columns.map((column) => (
+                                                    <TableHead key={column}>{column}</TableHead>
+                                                ))}
+                                            </TableRow>
+                                        </TableHeader>
+                                        <TableBody>
+                                            {isPending ? <RenderSkeleton/> : getFilterDocs()}
+                                        </TableBody>
+                                    </Table>
+                                </CardContent>
+                            </Card>
+
+                            <Card x-chunk="dashboard-05-chunk-3" className="flex-grow">
+                                <CardHeader className="px-7">
+                                    <CardTitle>Shared with me</CardTitle>
+                                </CardHeader>
+                                <CardContent>
+                                    <Table>
+                                        <TableHeader>
+                                            <TableRow>
+                                                {columns.map((column) => (
+                                                    <TableHead key={column}>{column}</TableHead>
+                                                ))}
+                                            </TableRow>
+                                        </TableHeader>
+                                        <TableBody>
+                                            {isSharedDocsPending ? <RenderSkeleton/> : getSharedDocs()}
+                                        </TableBody>
+                                    </Table>
+                                </CardContent>
+                            </Card>
+                        </div>
                     </div>
                 </main>
             </div>

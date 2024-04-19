@@ -18,7 +18,8 @@ import useCreateDoc from "@/hooks/useCreateDoc.ts";
 import {useRef, useState} from "react";
 import {useQueryClient} from "@tanstack/react-query";
 import {useToast} from "@/components/ui/use-toast.ts";
-import {docsQueryKeys} from "@/hooks/user-query-keys.ts";
+import {docsQueryKeys} from "@/hooks/doc-query-keys.ts";
+
 
 const formSchema = z.object({
     file: z.any(),

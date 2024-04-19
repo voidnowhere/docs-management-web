@@ -86,6 +86,7 @@ function Dashboard() {
     const {data: filterDocs, isPending} = useDocs(searchValue);
     const deleteMutation = useDeleteDoc();
     const columns = ['Title', 'Creation date', 'Metadata', ''];
+    const [count, setCount] = useState(filterDocs?.length || 0);
 
 
     function handleSearch(value: string) {
@@ -94,7 +95,12 @@ function Dashboard() {
 
     const handleDelete = async (id: string) => {
         await deleteMutation.mutateAsync(id);
+        if (count > 0) setCount(count - 1);
     };
+
+    const incrementCount = () => {
+        setCount(count + 1);
+    }
     const handleDownload = async (id: string) => {
         console.log('Download', id);
         window.open(`api/docs/${id}/download`, '_blank')
@@ -130,11 +136,11 @@ function Dashboard() {
                             <Card x-chunk="dashboard-05-chunk-1">
                                 <CardHeader className="pb-2">
                                     <CardDescription>Number of Documents</CardDescription>
-                                    <CardTitle className="text-4xl">86</CardTitle>
+                                    <CardTitle className="text-4xl">{filterDocs?.length}</CardTitle>
                                 </CardHeader>
                                 <CardContent>
-                                    <div className="text-xs text-muted-foreground">
-                                        +2 from last week
+                                    <div className="flex items-center">
+                                        <span className="text-muted-foreground">Total</span>
                                     </div>
                                 </CardContent>
                             </Card>
@@ -153,7 +159,7 @@ function Dashboard() {
                                     }}
                                 />
                             </div>
-                            <UploadDocDrawer/>
+                            <UploadDocDrawer incrementCount={incrementCount}/>
                         </div>
 
                         <Card x-chunk="dashboard-05-chunk-3">

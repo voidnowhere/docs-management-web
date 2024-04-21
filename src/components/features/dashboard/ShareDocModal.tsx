@@ -1,4 +1,4 @@
-import {Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger,} from "@/components/ui/dialog"
+import {Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger,} from "@/components/ui/dialog.tsx"
 import {Button} from "@/components/ui/button.tsx";
 import {useState} from "react";
 import {CircleMinus, CirclePlus, Share} from "lucide-react";
@@ -9,11 +9,12 @@ import {Form, FormControl, FormField, FormItem, FormMessage} from "@/components/
 import {Input} from "@/components/ui/input.tsx";
 import {DrawerFooter} from "@/components/ui/drawer.tsx";
 import {ScrollArea} from "@/components/ui/scroll-area.tsx";
-import useShareDoc from "@/hooks/useShareDoc.ts";
-import {PermissionType} from "@/types/permissionType.ts";
-import DocShareRequest from "@/types/docShareRequest.ts";
+import useShareDoc from "@/hooks/docs/useShareDoc.ts";
+import {PermissionType} from "@/types/docs/permissionType.ts";
+import DocShareRequest from "@/types/docs/docShareRequest.ts";
 import {Switch} from "@/components/ui/switch.tsx";
 import {Label} from "@/components/ui/label.tsx";
+import {useBoolean} from "ahooks";
 
 const formSchema = z.object({
     users: z.array(z.object({
@@ -22,7 +23,7 @@ const formSchema = z.object({
 })
 
 function ShareDocModal({docId}: { docId: string }) {
-    const [isOpen, setIsOpen] = useState<boolean>(false);
+    const [isOpen, {setTrue: setIsOpenTrue, setFalse: setIsOpenFalse}] = useBoolean(false);
     const form = useForm<z.infer<typeof formSchema>>({
         resolver: zodResolver(formSchema),
         defaultValues: {
@@ -62,7 +63,7 @@ function ShareDocModal({docId}: { docId: string }) {
     const closeModal = () => {
         removeUser()
         form.reset()
-        setIsOpen(false)
+        setIsOpenFalse()
     }
 
     const changePermission = () => {
@@ -73,7 +74,7 @@ function ShareDocModal({docId}: { docId: string }) {
     }
 
     return (
-        <Dialog open={isOpen} onOpenChange={setIsOpen}>
+        <Dialog open={isOpen} onOpenChange={setIsOpenTrue}>
             <DialogTrigger asChild>
                 <Button variant="outline" size="sm">
                     <Share className="h-4 w-4"/>

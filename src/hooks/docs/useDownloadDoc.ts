@@ -1,6 +1,6 @@
 import {useMutation} from "@tanstack/react-query";
-import {useApi} from "@/libs/useApi.ts";
-import DocDownloadRequest from "@/types/docDownloadRequest.ts";
+import {useApi} from "@/hooks/api/useApi.ts";
+import DocDownloadRequest from "@/types/docs/docDownloadRequest.ts";
 
 const useDownloadDoc = () => {
     const api = useApi()

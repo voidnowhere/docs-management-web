@@ -1,13 +1,12 @@
 import {useMutation, useQueryClient} from '@tanstack/react-query';
-import {useApi} from "@/libs/useApi.ts";
-import {docsQueryKeys} from "@/hooks/doc-query-keys.ts";
-import {useToast} from "@/components/ui/use-toast.ts";
+import {useApi} from "@/hooks/api/useApi.ts";
+import {toast} from "sonner";
+import {docsQueryKey} from "@/hooks/docs/useDocs.ts";
 
 
 export function useDeleteDoc() {
     const api = useApi();
     const queryClient = useQueryClient();
-    const {toast} = useToast()
 
     const deleteDocFn = async (id: string) => {
         return await api.current.delete<void>(`/api/docs/${id}`);
@@ -16,11 +15,10 @@ export function useDeleteDoc() {
     return useMutation({
         mutationFn: deleteDocFn,
         onMutate: async () => {
-            await queryClient.cancelQueries({queryKey: docsQueryKeys.all});
+            await queryClient.cancelQueries({queryKey: [docsQueryKey]});
         },
         onSuccess: () => {
-            toast({
-                title: "Document deleted",
+            toast.success('Document deleted', {
                 description: new Date().toLocaleString(
                     'fr-FR',
                     {
@@ -30,7 +28,7 @@ export function useDeleteDoc() {
                     }
                 ),
             });
-            queryClient.invalidateQueries({queryKey: docsQueryKeys.all});
+            queryClient.invalidateQueries({queryKey: [docsQueryKey]});
         }
     });
 }

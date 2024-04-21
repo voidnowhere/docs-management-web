@@ -14,15 +14,9 @@ import {Input} from "@/components/ui/input.tsx";
 import {z} from "zod";
 import {zodResolver} from "@hookform/resolvers/zod";
 import {ScrollArea} from "@/components/ui/scroll-area.tsx";
-import useCreateDoc from "@/hooks/useCreateDoc.ts";
-import {useEffect, useRef, useState} from "react";
-import {useQueryClient} from "@tanstack/react-query";
-import {useToast} from "@/components/ui/use-toast.ts";
-import {docsQueryKeys} from "@/hooks/doc-query-keys.ts";
-
-interface Props {
-    incrementCount: () => void;
-}
+import useCreateDoc from "@/hooks/docs/useCreateDoc.ts";
+import {useRef} from "react";
+import {useBoolean} from "ahooks";
 
 const formSchema = z.object({
     file: z.any(),
@@ -34,8 +28,8 @@ const formSchema = z.object({
     )
 })
 
-function UploadDocDrawer(props: Props) {
-    const [isOpen, setIsOpen] = useState<boolean>(false);
+function UploadDocDrawer() {
+    const [isOpen, {setTrue: setIsOpenTrue, setFalse: setIsOpenFalse}] = useBoolean(false);
     const form = useForm<z.infer<typeof formSchema>>({
         resolver: zodResolver(formSchema),
         defaultValues: {
@@ -53,14 +47,6 @@ function UploadDocDrawer(props: Props) {
     })
     const {mutateAsync: createDoc} = useCreateDoc()
     const inputFile = useRef<HTMLInputElement | null>(null)
-    const queryClient = useQueryClient()
-    const {toast} = useToast()
-    useEffect(() => {
-        if (!isOpen) {
-            removeMetadata()
-            form.reset()
-        }
-    }, [isOpen]);
 
     const onSubmit = (values: z.infer<typeof formSchema>) => {
         const file = inputFile.current?.files?.[0]
@@ -72,17 +58,7 @@ function UploadDocDrawer(props: Props) {
         createDoc({
             file: file,
             metadata: values.metadata,
-        }).then(() => {
-            props.incrementCount()
-            closeDrawer()
-            queryClient.invalidateQueries({queryKey: docsQueryKeys.all})
-        }).catch(reason => {
-            toast({
-                variant: 'destructive',
-                title: 'Error',
-                description: reason.response?.data?.error,
-            })
-        })
+        }).then(closeDrawer)
     }
 
     const addBlankMetadata = () => {
@@ -93,15 +69,16 @@ function UploadDocDrawer(props: Props) {
     }
 
     const closeDrawer = () => {
-        setIsOpen(false)
+        removeMetadata()
+        form.reset()
+        setIsOpenFalse()
     }
 
     return (
         <Drawer open={isOpen} dismissible={false}>
             <DrawerTrigger asChild>
-                <Button variant="outline" onClick={() => setIsOpen(true)}>
-                    <File className="h-3.5 w-3.5 mr-2"/>
-                    Upload new doc
+                <Button variant="outline" onClick={setIsOpenTrue}>
+                    <File className="h-3.5 w-3.5"/>&nbsp;Upload new doc
                 </Button>
             </DrawerTrigger>
             <DrawerContent>

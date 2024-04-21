@@ -9,7 +9,7 @@ export const useApi = () => {
     useEffect(() => {
         if (auth.isAuthenticated) {
             axiosInstance.current.interceptors.request.use((config) => {
-                config.headers.Authorization = `Bearer ${auth.user?.access_token}`
+                config.headers.Authorization = `${auth.user?.token_type} ${auth.user?.access_token}`
 
                 return config;
             });

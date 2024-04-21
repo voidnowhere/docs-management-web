@@ -1,7 +1,6 @@
-import {PermissionType} from "@/types/docs/permissionType.ts";
+import DocPermission from "@/types/docs/docPermission.ts";
 
 export default interface DocShareRequest {
     docId: string
-    permissionType: PermissionType
-    emails: string[]
+    users: DocPermission[]
 }

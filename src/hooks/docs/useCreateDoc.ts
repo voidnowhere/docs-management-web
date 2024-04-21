@@ -14,7 +14,10 @@ const useCreateDoc = () => {
         mutationFn: async (doc: DocPostRequest) => {
             const formData = new FormData();
             formData.append('file', doc.file)
-            formData.append('metadata', JSON.stringify(doc.metadata))
+            formData.append('metadata', new Blob(
+                [JSON.stringify(doc.metadata)],
+                {type: 'application/json'})
+            )
             await api.current.post<void>('api/docs', formData)
         },
         onSuccess: () => {

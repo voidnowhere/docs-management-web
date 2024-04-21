@@ -1,7 +1,6 @@
-import {Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger,} from "@/components/ui/dialog.tsx"
+import {Dialog, DialogContent, DialogHeader, DialogTitle} from "@/components/ui/dialog.tsx"
 import {Button} from "@/components/ui/button.tsx";
-import {useState} from "react";
-import {CircleMinus, CirclePlus, Share} from "lucide-react";
+import {CircleMinus, CirclePlus} from "lucide-react";
 import {z} from "zod";
 import {useFieldArray, useForm} from "react-hook-form";
 import {zodResolver} from "@hookform/resolvers/zod";
@@ -12,51 +11,63 @@ import {ScrollArea} from "@/components/ui/scroll-area.tsx";
 import useShareDoc from "@/hooks/docs/useShareDoc.ts";
 import {PermissionType} from "@/types/docs/permissionType.ts";
 import DocShareRequest from "@/types/docs/docShareRequest.ts";
-import {Switch} from "@/components/ui/switch.tsx";
-import {Label} from "@/components/ui/label.tsx";
 import {useBoolean} from "ahooks";
+import {Select, SelectContent, SelectItem, SelectTrigger, SelectValue} from "@/components/ui/select.tsx";
+import useDocPermissions from "@/hooks/docs/useDocPermissions.ts";
+import {useEffect} from "react";
 
 const formSchema = z.object({
     users: z.array(z.object({
-        email: z.string().email()
+        email: z.string().email(),
+        permission: z.enum([PermissionType.READ, PermissionType.WRITE]),
     })),
 })
 
-function ShareDocModal({docId}: { docId: string }) {
+function ShareDocModal({docId, unselectDocId}: { docId: string, unselectDocId: () => void }) {
     const [isOpen, {setTrue: setIsOpenTrue, setFalse: setIsOpenFalse}] = useBoolean(false);
+    const {data: docPermissions} = useDocPermissions(docId)
     const form = useForm<z.infer<typeof formSchema>>({
         resolver: zodResolver(formSchema),
         defaultValues: {
-            users: [{email: ''}],
+            users: [],
         }
     })
     const {
-        fields: emailFields,
-        append: appendEmail,
+        fields: permissionFields,
+        append: appendPermission,
         remove: removeUser,
     } = useFieldArray({
         name: 'users',
         control: form.control
     })
     const {mutateAsync: shareDoc} = useShareDoc()
-    const [permission, setPermission] = useState<PermissionType>(PermissionType.READ)
+    useEffect(() => {
+        if (docId.length > 0) {
+            setIsOpenTrue()
+        }
+    }, [docId]);
+    useEffect(() => {
+        if (docPermissions) {
+            removeUser()
+            docPermissions.forEach(p => {
+                appendPermission(p)
+            })
+        }
+    }, [docPermissions]);
 
     const onSubmit = (values: z.infer<typeof formSchema>) => {
-        const emails = values.users.map(user => user.email)
         const request: DocShareRequest = {
             docId: docId,
-            permissionType: permission,
-            emails: emails
+            users: values.users,
         }
 
-        shareDoc(request).then(() => {
-            closeModal()
-        })
+        shareDoc(request).then(closeModal)
     }
 
     const addBlankEmail = () => {
-        appendEmail({
-            email: ''
+        appendPermission({
+            email: '',
+            permission: PermissionType.READ,
         })
     }
 
@@ -64,34 +75,19 @@ function ShareDocModal({docId}: { docId: string }) {
         removeUser()
         form.reset()
         setIsOpenFalse()
-    }
-
-    const changePermission = () => {
-        setPermission(prevState => (prevState === PermissionType.READ)
-            ? PermissionType.WRITE
-            : PermissionType.READ
-        )
+        unselectDocId()
     }
 
     return (
-        <Dialog open={isOpen} onOpenChange={setIsOpenTrue}>
-            <DialogTrigger asChild>
-                <Button variant="outline" size="sm">
-                    <Share className="h-4 w-4"/>
-                </Button>
-            </DialogTrigger>
-            <DialogContent className="sm:max-w-[425px]">
+        <Dialog open={isOpen} onOpenChange={closeModal}>
+            <DialogContent className="sm:max-w-[500px]">
                 <DialogHeader>
                     <DialogTitle>Share doc</DialogTitle>
                 </DialogHeader>
                 <ScrollArea className="h-96">
-                    <div className='flex justify-center items-center space-x-2 grow'>
-                        <Switch checked={permission === PermissionType.WRITE} onCheckedChange={changePermission}/>
-                        <Label>{permission.toLowerCase()}</Label>
-                    </div>
                     <Form {...form}>
                         <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-8 pt-2">
-                            {emailFields.map((_, index) => {
+                            {permissionFields.map((_, index) => {
                                 return (
                                     <div key={index} className='flex gap-2 px-3'>
                                         <FormField
@@ -106,8 +102,33 @@ function ShareDocModal({docId}: { docId: string }) {
                                                 </FormItem>
                                             )}
                                         />
-                                        <Button variant="destructive" onClick={() => removeUser(index)}
-                                                disabled={index === 0}>
+                                        <FormField
+                                            control={form.control}
+                                            name={`users.${index}.permission`}
+                                            render={({field}) => (
+                                                <FormItem>
+                                                    <Select onValueChange={field.onChange}
+                                                            defaultValue={PermissionType.READ}>
+                                                        <FormControl>
+                                                            <SelectTrigger>
+                                                                <SelectValue
+                                                                    placeholder="Select a verified email to display"/>
+                                                            </SelectTrigger>
+                                                        </FormControl>
+                                                        <SelectContent>
+                                                            <SelectItem value={PermissionType.READ}>
+                                                                {PermissionType.READ.toLowerCase()}
+                                                            </SelectItem>
+                                                            <SelectItem value={PermissionType.WRITE}>
+                                                                {PermissionType.WRITE.toLowerCase()}
+                                                            </SelectItem>
+                                                        </SelectContent>
+                                                    </Select>
+                                                    <FormMessage/>
+                                                </FormItem>
+                                            )}
+                                        />
+                                        <Button variant="destructive" onClick={() => removeUser(index)}>
                                             <CircleMinus/>
                                         </Button>
                                     </div>
@@ -115,8 +136,7 @@ function ShareDocModal({docId}: { docId: string }) {
                             })}
                             <div className="flex justify-center">
                                 <Button onClick={addBlankEmail} variant="secondary" type='button'>
-                                    <CirclePlus className='mr-2'/>
-                                    Add user email
+                                    <CirclePlus/>&nbsp;Add user
                                 </Button>
                             </div>
                             <DrawerFooter>

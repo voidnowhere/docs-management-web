@@ -1,6 +1,6 @@
 import {useMemo, useState} from "react";
 import UploadDocDrawer from "@/components/features/dashboard/UploadDocDrawer";
-import {Search} from "lucide-react";
+import {Search, Share2} from "lucide-react";
 import {
     Card,
     CardContent,
@@ -21,13 +21,14 @@ import {
     formatLocalDateToDateString,
     formatLocalDateToTimeString,
 } from "@/utils/dateFormat.ts";
-import ShareDocModal from "@/components/features/dashboard/ShareDocModal.tsx";
 import {useDebounce} from "ahooks";
 import useDocs from "@/hooks/docs/useDocs.ts";
 import DownloadDocButton from "@/components/features/dashboard/DownloadDocButton.tsx";
 import DeleteDocButton from "@/components/features/dashboard/DeleteDocButton.tsx";
 import DocsCounterCard from "@/components/features/dashboard/DocsCounterCard.tsx";
 import TableRowSkeletons from "@/components/custom/TableRowSkeleton.tsx";
+import {Button} from "@/components/ui/button.tsx";
+import ShareDocModal from "@/components/features/dashboard/ShareDocModal.tsx";
 
 function DocsPage() {
     const [searchValue, setSearchValue] = useState<string>("");
@@ -38,6 +39,11 @@ function DocsPage() {
         () => filterDocs?.length ?? 0,
         [filterDocs]
     )
+    const [selectedDocId, setSelectedDocId] = useState<string>('');
+
+    const unselectDocId = () => {
+        setSelectedDocId('')
+    }
 
     const handleSearch = (value: string) => {
         setSearchValue(value);
@@ -74,7 +80,9 @@ function DocsPage() {
                 <TableCell>
                     <div className="flex h-1 items-center text-sm">
                         <DownloadDocButton docId={doc.id}/>
-                        <ShareDocModal docId={doc.id}/>
+                        <Button variant="outline" size="sm" onClick={() => setSelectedDocId(doc.id)}>
+                            <Share2 className="h-4 w-4"/>
+                        </Button>
                         <DeleteDocButton docId={doc.id}/>
                     </div>
                 </TableCell>
@@ -82,7 +90,8 @@ function DocsPage() {
         ));
     }
 
-    return (
+    return (<>
+        <ShareDocModal docId={selectedDocId} unselectDocId={unselectDocId}/>
         <div className="flex min-h-screen w-full flex-col bg-muted/40">
             <div className="flex flex-col sm:gap-14 sm:py-10 sm:pl-4">
                 <main
@@ -135,7 +144,7 @@ function DocsPage() {
                 </main>
             </div>
         </div>
-    )
+    </>)
 }
 
 export default DocsPage;

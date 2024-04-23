@@ -1,9 +1,10 @@
-import {useApi} from "../libs/useApi";
+import {useApi} from "@/hooks/api/useApi.ts";
 import {useQuery} from "@tanstack/react-query";
-import {Doc} from "@/types/doc.ts";
-import {docsQueryKeys} from "@/hooks/doc-query-keys.ts";
+import {Doc} from "@/types/docs/doc.ts";
 
-export const useDocs = (keyword: string) => {
+export const docsQueryKey = 'docs'
+
+const useDocs = (keyword: string) => {
     const api = useApi();
 
     return useQuery({
@@ -11,6 +12,8 @@ export const useDocs = (keyword: string) => {
             const response = await api.current.get<Doc[]>(`/api/docs`, {params: {keyword: keyword}});
             return response.data;
         },
-        queryKey: docsQueryKeys.search(keyword),
+        queryKey: [docsQueryKey, keyword],
     });
 };
+
+export default useDocs

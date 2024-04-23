@@ -1,4 +1,4 @@
-import Metadata from "@/types/metadata.ts";
+import Metadata from "@/types/docs/metadata.ts";
 
 interface DocPostRequest {
     file: File,

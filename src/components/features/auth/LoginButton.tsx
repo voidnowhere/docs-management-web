@@ -9,6 +9,10 @@ function LoginButton() {
         auth.signinRedirect()
     }
 
+    if (auth.isLoading) {
+        return null
+    }
+
     if (!auth.isAuthenticated) {
         return (
             <Button variant='ghost' onClick={login}>
